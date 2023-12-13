@@ -1,0 +1,20 @@
+[package]
+name = "medai"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+actix-web = "4.4.0"
+dotenv = "0.15.0"
+r2d2 = "0.8.9"
+tokio-postgres = "0.7.10"
+tokio = "1.34.0"
+pq = "1.4.3"
+diesel = "2.1.4"
+serde = { version = "1.0", features = ["derive"] }
+tokio-pg-mapper-derive = "0.2.0"
+tokio-pg-mapper = "0.2.0"
+deadpool-postgres = "0.11.0"
+serde_json = "1.0.108"
