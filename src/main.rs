@@ -19,43 +19,30 @@ async fn connect_db() -> Result<Client, PostgresError> {
     tokio::spawn(async move {
         if let Err(e) = connection.await {
             eprintln!("connection error: {}", e);
+        } else {
+            println!("Connected to the database");
         }
     });
 
     Ok(client)
 }
 
-async fn init_schema(client: Arc<Client>) -> Result<(), PostgresError> {
-    let schema_content =
-        fs::read_to_string("./sql/schema.sql").expect("Failed to read schema file");
-
-    client.batch_execute(&schema_content).await?;
-
-    Ok(())
-}
+// async fn init_schema(client: Arc<Client>) -> Result<(), PostgresError> {
+//     let schema_content = fs::read_to_string("schema.sql").expect("Failed to read schema file");
+//
+//     client.batch_execute(&schema_content).await?;
+//
+//     println!("Schema initialized successfully");
+//
+//     Ok(())
+// }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let client = connect_db().await.expect("Failed to connect to database");
-    let client_arc = Arc::new(client);
+    let _client_data = web::Data::new(client);
 
-    let cloned_client = Arc::clone(&client_arc);
+    let app = move || App::new().service(hello).configure(team_routes);
 
-    tokio::spawn(async move {
-        if let Err(e) = init_schema(cloned_client).await {
-            eprintln!("Failed to initialize schema: {}", e);
-        } else {
-            println!("Schema initialized successfully");
-        }
-    });
-
-    HttpServer::new(move || {
-        App::new()
-            .app_data(web::Data::new(Arc::clone(&client_arc)))
-            .service(hello)
-            .configure(team_routes)
-    })
-    .bind("127.0.0.1:8080")?
-    .run()
-    .await
+    HttpServer::new(app).bind("127.0.0.1:8080")?.run().await
 }

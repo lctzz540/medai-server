@@ -999,10 +999,12 @@ dependencies = [
 name = "medai"
 version = "0.1.0"
 dependencies = [
+ "actix-service",
  "actix-web",
  "deadpool-postgres",
  "diesel",
  "dotenv",
+ "futures-util",
  "pq",
  "r2d2",
  "serde",
