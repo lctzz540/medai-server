@@ -1,6 +1,6 @@
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
 use medai::handlers::team_member::team_routes;
-use std::{env, fs, sync::Arc};
+use std::{env};
 use tokio_postgres::{Client, Error as PostgresError, NoTls};
 
 #[get("/")]
