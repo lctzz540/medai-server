@@ -1,6 +1,6 @@
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
-use medai::handlers::team_member::team_routes;
-use std::{env};
+use medai::handlers::{self};
+use std::env;
 use tokio_postgres::{Client, Error as PostgresError, NoTls};
 
 #[get("/")]
@@ -39,10 +39,17 @@ async fn connect_db() -> Result<Client, PostgresError> {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let client = connect_db().await.expect("Failed to connect to database");
+    let client = connect_db()
+        .await
+        .expect("Failed to connect to the database");
     let _client_data = web::Data::new(client);
 
-    let app = move || App::new().service(hello).configure(team_routes);
+    let app = move || {
+        App::new()
+            .service(hello)
+            .configure(handlers::team_member::team_routes)
+            .app_data(web::Data::clone(&_client_data))
+    };
 
     HttpServer::new(app).bind("127.0.0.1:8080")?.run().await
 }
