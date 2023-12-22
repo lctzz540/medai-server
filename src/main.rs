@@ -1,5 +1,6 @@
-use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
-use medai::handlers::{self};
+use actix_cors::Cors;
+use actix_web::{get, http::header, web, App, HttpResponse, HttpServer, Responder};
+use medai::handlers;
 use std::env;
 use tokio_postgres::{Client, Error as PostgresError, NoTls};
 
@@ -45,8 +46,21 @@ async fn main() -> std::io::Result<()> {
     let _client_data = web::Data::new(client);
 
     let app = move || {
+        let cors = Cors::default()
+            .allow_any_origin()
+            .allowed_methods(vec!["GET", "POST"])
+            .allowed_headers(vec![header::AUTHORIZATION, header::ACCEPT])
+            .max_age(3600);
+
         App::new()
+            .wrap(cors)
             .service(hello)
+            .service(
+                actix_files::Files::new("/static/avatar", "./static/avatar").show_files_listing(),
+            )
+            .service(
+                actix_files::Files::new("/static/carosel", "./static/carosel").show_files_listing(),
+            )
             .configure(handlers::team_member::team_routes)
             .app_data(web::Data::clone(&_client_data))
     };

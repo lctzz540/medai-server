@@ -5,7 +5,6 @@ use tokio_postgres::{Client, Error as PostgresError};
 #[derive(Deserialize, PostgresMapper, Serialize)]
 #[pg_mapper(table = "team")]
 pub struct TeamMember {
-    pub id: i32,
     pub name: String,
     pub role: String,
     pub units: String,
@@ -21,8 +20,8 @@ pub struct TeamMember {
 pub async fn add(client: &Client, team_member: &TeamMember) -> Result<(), PostgresError> {
     client
         .execute(
-            "INSERT INTO team (name, role, units, description, avatar, github, facebook, linkedin, twitter, envelope)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
+            "INSERT INTO team (id, name, role, units, description, avatar, github, facebook, linkedin, twitter, envelope)
+             VALUES (uuid_generate_v4(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
             &[&team_member.name, &team_member.role, &team_member.units, &team_member.description,
               &team_member.avatar, &team_member.github, &team_member.facebook, &team_member.linkedin,
               &team_member.twitter, &team_member.envelope]
@@ -39,7 +38,6 @@ pub async fn get(client: &Client) -> Result<Vec<TeamMember>, PostgresError> {
 
     for row in rows {
         let team_member = TeamMember {
-            id: row.get("id"),
             name: row.get("name"),
             role: row.get("role"),
             units: row.get("units"),
